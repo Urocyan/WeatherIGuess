@@ -1,0 +1,69 @@
+<head>	
+	<title>Open Weather</title>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function () {
+	$("#zipInput").focusout(function() {
+		var curZip = $("#zipInput").val();
+		var openWeather = "http://api.openweathermap.org/data/2.5/weather?&APPID=4f1467625e222a3345ce0a44f13333e7";
+		if(curZip.length != 5 || isNaN(curZip)) {
+			$("#alertBox").removeClass("alert-success");
+			$("#alertBox").addClass("alert-warning");
+			}
+		else {
+			$("#alertBox").addClass("alert-success");
+			$("#alertBox").removeClass("alert-warning");
+			$.getJSON(openWeather, {
+				zip: curZip,
+			})
+			.done(function( data ) {
+				var curTemp = (data.main.temp * (9/5)) - 459.67;
+				var curHum = data.main.humidity + "%";
+				var location = data.name;
+				$("#loc").text( location );
+				$("#temp").text( curTemp );
+				$("#hum").text( curHum );
+				if(curTemp < 60) {
+					$("#mainPage").css("background-color", "turquoise");
+					$("#mainPage").css("color", "white");
+				}
+				else if(curTemp >= 60 && curTemp <= 90) {
+					$("#mainPage").css("background-color", "orange");
+					$("#mainPage").css("color", "white");
+				}
+				else if(curTemp > 90) {
+					$("#mainPage").css("background-color", "red");
+					$("#mainPage").css("color", "white");
+				}
+			});
+		}	
+	});
+});
+</script>
+<style>
+body {
+	font-size: 36pt;
+	text-color: black;
+	font-family: Helvetica;
+	transition: background-color 2s ease, color 2s ease;
+}
+</style>
+</head>
+<body id="mainPage">
+<div class="row">
+	<div class="col-lg-6" ng-app="">
+		<div class="input-group">
+			<span class="input-group-addon">Zip Code</span>
+			<input id="zipInput" type="text" class="form-control" name="msg" placeholder="Enter Zip Code Here" ng-model="name" style="display: block;">
+		</div>
+		<p id="alertBox" ng-bind="name" class="alert alert-success"></p>
+		<p>Location: <span id="loc"></span></p>
+		<p>Current Temperature: <span id="temp"></span></p>
+		<p>Humidity: <span id="hum"></span></p>
+	</div>
+</div>
+</body>
+</html>
