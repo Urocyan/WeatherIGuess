@@ -1,5 +1,8 @@
 <head>	
 	<title>Open Weather</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -21,10 +24,11 @@ $(document).ready(function () {
 			})
 			.done(function( data ) {
 				var curTemp = (data.main.temp * (9/5)) - 459.67;
+				curTemp = curTemp.toPrecision(4);
 				var curHum = data.main.humidity + "%";
 				var location = data.name;
 				$("#loc").text( location );
-				$("#temp").text( curTemp );
+				$("#temp").text( curTemp + " F");
 				$("#hum").text( curHum );
 				if(curTemp < 60) {
 					$("#mainPage").css("background-color", "turquoise");
@@ -54,14 +58,22 @@ body {
 </head>
 <body id="mainPage">
 <div class="row">
-	<div class="col-lg-6" ng-app="">
+	<div class="col-lg-12" ng-app="">
 		<div class="input-group">
 			<span class="input-group-addon">Zip Code</span>
 			<input id="zipInput" type="text" class="form-control" name="msg" placeholder="Enter Zip Code Here" ng-model="name" style="display: block;">
 		</div>
 		<p id="alertBox" ng-bind="name" class="alert alert-success"></p>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-4">
 		<p>Location: <span id="loc"></span></p>
+	</div>
+	<div class="col-lg-8">
 		<p>Current Temperature: <span id="temp"></span></p>
+	</div>
+	<div class="col-lg-4">
 		<p>Humidity: <span id="hum"></span></p>
 	</div>
 </div>
