@@ -28,9 +28,11 @@ $(document).ready(function () {
 	}
 	
 	var getWeather = function() {
-		if((latitude != null && longitude != null)&& $("#zipInput").val() == "") {
+		if($("#zipInput").val() == "") {
+			if((latitude != null && longitude != null)) {
 			var openWeather = "http://api.openweathermap.org/data/2.5/weather?&APPID=4f1467625e222a3345ce0a44f13333e7&lat="+latitude+"&lon="+longitude;
 			console.log(openWeather);
+			}
 		}
 		else {
 			var curZip = $("#zipInput").val();
@@ -53,26 +55,34 @@ $(document).ready(function () {
 			curTemp = curTemp.toPrecision(4);
 			var curHum = data.main.humidity + "%";
 			var location = data.name;
+			var weatherDesc = data.weather[0].description;
 			$("#loc").text( location );
+			$("#weatherDesc").text( weatherDesc );
 			$("#temp").text( curTemp + " F");
 			$("#hum").text( curHum );
 			if(curTemp < 60) {
 				$("#mainPage").css("background-color", "turquoise");
-				$("#mainPage").css("color", "white");
 			}
 			else if(curTemp >= 60 && curTemp <= 90) {
 				$("#mainPage").css("background-color", "orange");
-				$("#mainPage").css("color", "white");
 			}
 			else if(curTemp > 90) {
 				$("#mainPage").css("background-color", "red");
-				$("#mainPage").css("color", "white");
 			}
+			$("#weatherHolder").css("opacity","1");
 		}
 	});
 	}
 	$("#geolocButton").click(function() {
 		getLoc();
+		setTimeout(function() {
+			if(latitude != null && longitude != null) {
+				$("#geolocButton").removeClass("btn-info");
+				$("#geolocButton").addClass("btn-success");
+				$("#geoIcon").attr("class","glyphicon glyphicon-ok");
+			}
+		}
+		, 5000);
 	});
 	$("#getWeatherButton").click( function() {
 		getWeather();
@@ -80,39 +90,54 @@ $(document).ready(function () {
 });
 </script>
 <style>
-body {
-	font-size: 36pt;
+h3 {
 	text-color: black;
 	font-family: Helvetica;
-	transition: background-color 2s ease, color 2s ease;
+	transition: color 2s ease;
+}
+body {
+	transition: background-color 2s ease;
+}
+#weatherHolder {
+	opacity: 0;
+	transition: opacity 2s ease;
 }
 </style>
 </head>
-<body id="mainPage">
+<body id="mainPage" ng-app="">
 <div class="row">
-	<div class="col-lg-12" ng-app="">
+	<div class="col-lg-12">
 		<div class="input-group">
 			<span class="input-group-addon">Zip Code</span>
 			<input id="zipInput" type="text" class="form-control" name="msg" placeholder="Enter Zip Code Here" ng-model="name" style="display: block;">
-			<div class="input-group-btn">
-				<button class="btn btn-info" style="height:100%;" id="geolocButton">Detect Location <span class="glyphicon glyphicon-screenshot"></span></button>
-			</div>
-			<div class="input-group-btn">
-				<button class="btn btn-primary" id="getWeatherButton">Get Weather <span class="glyphicon glyphicon-refresh"></span></button>
-			</div>
 		</div>
-		<p id="alertBox" ng-bind="name" class="alert alert-success"></p>
 	</div>
 </div>
 <div class="row">
-	<div class="col-lg-4">
-		<p>Location: <span id="loc"></span></p>
+	<div class="col-lg-12">
+		<div class="input-group">
+			<div class="input-group-btn">
+				<button class="btn btn-info" style="width:100%;" id="geolocButton">Detect Location <span id="geoIcon" class="glyphicon glyphicon-screenshot"></span></button>
+			</div>
+			<div class="input-group-btn">
+				<button class="btn btn-primary" style="width:100%;" id="getWeatherButton">Get Weather <span class="glyphicon glyphicon-refresh"></span></button>
+			</div>
+		</div>
 	</div>
-	<div class="col-lg-8">
-		<p>Current Temperature: <span id="temp"></span></p>
+	<div class="col-lg-12">
+	<p id="alertBox" ng-bind="name" class="alert alert-success"></p>
 	</div>
-	<div class="col-lg-4">
-		<p>Humidity: <span id="hum"></span></p>
+</div>
+<div class="row">
+	<div class="col-lg-12">
+	<div class="panel panel-default" id="weatherHolder">
+		<div class="panel-heading"><h3><span id="loc"></span>: <span id="weatherDesc"></span></h3></div>
+	<div class="panel-body">
+	<h3>Current Temperature: <span id="temp"></span></h3>
+	<br />
+	<h3>Humidity: <span id="hum"></span></h3>
+	</div>
+</div>
 	</div>
 </div>
 </body>
