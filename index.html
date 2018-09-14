@@ -12,6 +12,18 @@ $(document).ready(function () {
 	var gotCoords = false;
 	var latitude = null;
 	var longitude = null;
+	var parseDate = function(dt_txt) {
+		var today = dt_txt;
+		var todayDate = today.split(" ");
+		today = todayDate[0];
+		return today;
+	}
+	var formatDate = function(dt_txt) {
+		var date = dt_txt.split(" ")[0];
+		date = date.split("-");
+		var formattedDate = date[2] + ", " + date[1] + " " + date[0];
+		return formattedDate;
+	}
 	var getLoc = function() {
 		if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
@@ -70,22 +82,55 @@ $(document).ready(function () {
 				$("#mainPage").css("background-color", "red");
 			}
 			$("#weatherHolder").css("opacity","1");
+			$("#loadForecastButton").css("opacity","1");
 		}
 	});
-	}
+	} 
 	$("#geolocButton").click(function() {
 		getLoc();
 		setTimeout(function() {
+			console.log("Checked");
 			if(latitude != null && longitude != null) {
 				$("#geolocButton").removeClass("btn-info");
 				$("#geolocButton").addClass("btn-success");
 				$("#geoIcon").attr("class","glyphicon glyphicon-ok");
 			}
-		}
-		, 5000);
+		}, 4000);
 	});
 	$("#getWeatherButton").click( function() {
 		getWeather();
+	});
+	var fiveDayForecast = function() {
+		var openWeatherForecast = "http://api.openweathermap.org/data/2.5/forecast?&units=imperial&APPID=4f1467625e222a3345ce0a44f13333e7&lat="+latitude+"&lon="+longitude;
+		console.log(openWeatherForecast);
+		var today = "";
+		var notToday = "";
+		var todayDate = [];
+		$.ajax({
+			type: "GET",
+			dataType: "json",
+			url: openWeatherForecast,
+			success: function( data ) {
+			$.each( data.list, function( i, item ) {
+				if(i == 4) {
+					today = parseDate(item.dt_txt);
+					$("<div>").attr("class","col-lg-6")
+					.html("<div class='panel panel-default'><div class='panel-heading'>"+formatDate(item.dt_txt)+" - "+item.weather[0].description+"</div><div class='panel-body'><h3>Temperature: "+item.main.temp+"</h3><br /><h3>Humidity: "+item.main.humidity+"%</h3></div></div>")
+					.appendTo("#forecastHolder");
+				}
+				if(item.dt_txt.indexOf(today) == -1) {
+					today = parseDate(item.dt_txt);
+					$("<div>").attr("class","col-lg-6")
+					.html("<div class='panel panel-default'><div class='panel-heading'>"+formatDate(item.dt_txt)+" - "+item.weather[0].description+"</div><div class='panel-body'><h3>Temperature: "+item.main.temp+"</h3><br /><h3>Humidity: "+item.main.humidity+"%</h3></div></div>")
+					.appendTo("#forecastHolder");
+				}
+			});
+		}
+	});
+	}
+	$("#loadForecastButton").click( function() {
+		
+		fiveDayForecast();
 	});
 });
 </script>
@@ -102,6 +147,9 @@ body {
 	opacity: 0;
 	transition: opacity 2s ease;
 }
+#loadForecastButton {
+	opacity: 0;
+	transition: opacity 2s ease;
 </style>
 </head>
 <body id="mainPage" ng-app="">
@@ -137,8 +185,14 @@ body {
 	<br />
 	<h3>Humidity: <span id="hum"></span></h3>
 	</div>
-</div>
 	</div>
+	</div>
+</div>
+<div class="container-fluid">
+	<button class="btn btn-primary" style="width: 100%;" id="loadForecastButton">5 Day Forecast <span class="glyphicon glyphicon-triangle-bottom"></span>
+</button>
+<div class="row" id="forecastHolder">
+</div>
 </div>
 </body>
 </html>
